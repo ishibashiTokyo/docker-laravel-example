@@ -29,8 +29,11 @@ function tag($tag, $txt) {
 
 class HelloController extends Controller
 {
-    public function index() {
+    public function index($msg = '') {
         $data = ['msg' => 'これはコントローラで設定されたプレースホルダーの内容です'];
+        if (! empty($msg)) {
+            $data['msg'] = $msg;
+        }
         return view('hello.index', $data);
 
         // global $head, $style, $body, $end;

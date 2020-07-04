@@ -33,7 +33,7 @@ $ composer create-project laravel/laravel プロジェクト名 --prefer-dist
 
 プロジェクトフォルダに移動して artisan（アーティザン）コマンドを実行  
 命名規則：`{NAME}Controller`  
-下記の例ではlaravelapp/app/Http/Controllers/HelloController.phpが作成される
+下記の例では laravelapp/app/Http/Controllers/HelloController.php が作成される
 
 ```shell
 $ cd /var/www/html/laravelapp
@@ -121,24 +121,124 @@ docker-lemp
 
 ## メモ
 
-ルーティング
+### ルーティング
+
 - マルチアクションコントローラの場合  
   アクションとアドレスの関係は以下のようになるようにルーティングする  
   `http://アプリケーションのアドレス/コントローラ/アクション`
 - シングルアクションコントローラの場合  
-  1つのコントローラに1つのアクションしか用意しない場合は`__invoke`というマジックメソッドを使用する  
+  1 つのコントローラに 1 つのアクションしか用意しない場合は`__invoke`というマジックメソッドを使用する  
   コントローラにメソッドは追加できるが、アクションとして呼び出すことはできなくなる。  
   ルーティングにはアクションを示す`@~`の指定は必要なし
 
-テンプレートエンジン
+### テンプレートエンジン
 
 - Blade（ブレード）という独自テンプレートエンジンを採用
-- テンプレートファイルの置き場はlaravelapp/resources/views/
-- テンプレートのファイル構成はコントローラの構成に添ったように構築するとわかりやすい。  
-  コントローラ名のフォルダを作成し、アクションごとのテンプレートファイルを設置する
-- テンプレートファイルがindex.phpとindex.blade.phpがあった場合は後者が優先される
+- テンプレートファイルの置き場は laravelapp/resources/views/
+  - テンプレートのファイル構成はコントローラの構成に添ったように構築するとわかりやすい。  
+   コントローラ名のフォルダを作成し、アクションごとのテンプレートファイルを設置する
+- テンプレートファイルが index.php と index.blade.php があった場合は後者が優先される
 - `view()`関数は resources/views/{引数}.blade.php を表示する
 - プレースホルダーの使用は`view()`関数の第二引数に連想配列で格納する
-- CSRF対策のコード`{{csrf_token()}}`は5.6-で`@csrf`でも対応可能になった
-- POST投稿を行うときにCSRF対策を行わないと419エラーが発生する
-- 
+- CSRF 対策のコード`{{csrf_token()}}`は 5.6-で`@csrf`でも対応可能になった
+- POST 投稿を行うときに CSRF 対策を行わないと 419 エラーが発生する
+- `{{~}}`を用いた値の表示について常に HTML エスケープ処理が行われる
+- HTML タグを出力したい場合は`{!!~!!}`を使用する
+- コメントアウト`{{-- comment out --}}`
+
+### Blade で使用するよく使いそうなディレクディブ
+
+```
+@if ($var != '')
+  ...
+@elseif ($var = true)
+  ...
+@else
+  ...
+@endif
+```
+
+```
+@unless ($var)
+  ...{{-- 条件が非成立時、@if の逆の動きを行う。 --}}
+@endunless
+```
+
+```
+@empty ($var)
+  ...
+@endempty
+```
+
+```
+@isset ($var)
+  ...{{-- 変数が定義されていて、なおかつnullでない場合 --}}
+@endisset
+```
+
+PHP のコードを埋め込めるが極力使わないほうがよさそう
+
+```
+@php
+  ...// PHP code
+@endphp
+```
+
+#### 繰り返し系ディレクティブ
+
+break, continue ともに使用可能
+
+```
+@break
+@continue
+```
+
+```
+@for ($i = 0; $i < 10; $i++)
+  ...
+@endfor
+```
+
+```
+@foreach ($array as $value)
+  ...
+@endforeach
+```
+
+foreach-else に相当
+
+```
+@forelse ($array as $value)
+  ...
+@empty
+  ...{{-- 値をすべて取り出し終えて値が取れ出せなくなったときに実行 --}}
+@endforelse
+```
+
+@while ディレクティブ　基本使いたくない
+
+```
+@while ($bool)
+  ...
+  @php
+    $bool = false;
+  @endphp
+@endwhile
+```
+
+ループ変数
+
+| 変数               | 概要                                     |
+| ------------------ | ---------------------------------------- |
+| `$loop->index`     | 現在のインデックス（0 始まり）           |
+| `$loop->iteration` | 現在の繰り返し回数（1 始まり）           |
+| `$loop->remaining` | 残りの繰り返し回数（残り回数）           |
+| `$loop->count`     | 繰り返しで使用している配列の要素数       |
+| `$loop->first`     | 最初の繰り返しかどうか（boolean）        |
+| `$loop->last`      | 最後の繰り返しかどうか（boolean）        |
+| `$loop->depth`     | 繰り返しのネスト数                       |
+| `$loop->parent`    | ネスト時の親の繰り返しのループ変数を示す |
+
+#### レイアウト用ディレクティブ
+
+

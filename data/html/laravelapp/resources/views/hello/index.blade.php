@@ -18,9 +18,14 @@
     <h1>Index - by Blade</h1>
     <p>フォームサンプル</p>
     <p>msg: {{$msg}}</p>
+    @if ($msg != '')
+        <p>$msgは空ではない</p>
+    @else
+        <p>＄msgは空</p>
+    @endif
     <form action="/hello" method="POST">
     <!-- {{csrf_field()}} -->
-    <!-- @csrf -->
+    @csrf
     <input type="text" name="msg">
     <input type="submit">
     </form>
