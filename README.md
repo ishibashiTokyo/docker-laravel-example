@@ -1,4 +1,6 @@
-# Docker-LEMP
+# Docker-Laravel-Example
+
+勉強用に作成したレポジトリ
 
 | ミドルウェア | サービス名 | ポート     | 使用イメージ          |
 | ------------ | ---------- | ---------- | --------------------- |
@@ -18,9 +20,28 @@
 
 ## TODO
 
-- 設定ファイルの構成を整理
+## composer を使った Laravel のインストール
 
-## ファイル構成
+php-fpm のコンテナ上から以下のコマンドを実行
+
+```shell
+$ cd /var/www/html
+$ composer create-project laravel/laravel プロジェクト名 --prefer-dist
+```
+
+## コントローラーの作成
+
+プロジェクトフォルダに移動して artisan（アーティザン）コマンドを実行  
+命名規則：`{NAME}Controller`  
+下記の例ではlaravelapp/app/Http/Controllers/HelloController.phpが作成される
+
+```shell
+$ cd /var/www/html/laravelapp
+$ php artisan make:controller HelloController
+Controller created successfully.
+```
+
+## Docker ファイル構成
 
 ```
 docker-lemp
@@ -42,171 +63,82 @@ docker-lemp
 └── docker-compose.yml
 ```
 
-## Mac に mysql クライアントの導入
-
-あまり環境を汚したくないけど Docker のデータベースに接続したいそんな感じ。
-
-インストール
+## Laravel ファイル構成
 
 ```shell
-% brew install mysql-client
+% tree -L 1 -a  .
+.
+├── .editorconfig
+├── .env              動作環境に関する設定情報
+├── .env.example      動作環境に関する設定情報
+├── .gitattributes    git利用に関する情報
+├── .gitignore        git利用に関する情報
+├── .styleci.yml
+├── README.md
+├── app               [!]アプリケーションのプログラム置き場
+├── artisan           artisanコマンド `php artisan serve`
+├── bootstrap         アプリケーション実行時に最初に行われる処理をまとめる場所
+├── composer.json     composerファイル
+├── composer.lock     composerファイル
+├── config            アプリケーションの設定（定数）ファイル置き場
+├── database          データベース関係のプログラム
+├── package.json      npmファイル
+├── phpunit.xml       PHPUnitファイル
+├── public            公開ディレクトリ
+├── resources         [!]テンプレートファイル置き場
+├── routes            [!]ルーティング情報
+├── server.php        PHPのビルドインサーバーを利用したときに使用するファイル
+├── storage           アプリケーションの出力するファイル置き場　ログファイルなど
+├── tests             ユニットテスト用ファイル置き場
+├── vendor            フレームワークのコア
+└── webpack.mix.js    webpackファイル
 ```
 
-シェルのプロファイル（~/.zshrc など）に以下のパスを追加する
-
-```
-export PATH="/usr/local/opt/mysql-client/bin:$PATH"
-```
-
-設定ファイルを作成
+## app ファイル構成
 
 ```shell
-% touch ~/.my.cnf
+% tree -L 1 -a .
+.
+├── Console       コンソールプログラム置き場
+├── Exceptions    例外処理の置き場
+├── Http          [!]基本的なアプリケーションプログラム置き場
+├── Providers     プロバイダプログラムの置き場
+└── User.php      ユーザ認証用プログラム
 ```
 
-デフォルトの設定では localhost を指定すると Unix ソケットで接続を試みるので、
-プロトコルを TCP に変更して、Docker 上のコンテナと接続できるようにする。
-
-```
-[client]
-protocol=TCP
-```
-
-実際に接続してみると.env で指定されたユーザとデータベースが作成されていることが確認できる。
+## routes ファイル構成
 
 ```shell
-% mysql -u docker -pdocker
-...
-mysql> show databases;
-+--------------------+
-| Database           |
-+--------------------+
-| docker_db          |
-| information_schema |
-+--------------------+
-2 rows in set (0.01 sec)
-mysql> show grants;
-+---------------------------------------------------------------+
-| Grants for docker@%                                           |
-+---------------------------------------------------------------+
-| GRANT USAGE ON *.* TO `docker`@`%` IDENTIFIED BY PASSWORD '*' |
-| GRANT ALL PRIVILEGES ON `docker\_db`.* TO `docker`@`%`        |
-+---------------------------------------------------------------+
-2 rows in set (0.00 sec)
-```
-
-## PHP モジュール
-
-```shell
-[PHP Modules]
-bcmath
-bz2
-calendar
-Core
-ctype
-curl
-date
-dba
-dom
-exif
-fileinfo
-filter
-ftp
-gd
-hash
-iconv
-json
-ldap
-libxml
-mbstring
-mysqli
-mysqlnd
-openssl
-pcre
-PDO
-pdo_mysql
-pdo_pgsql
-pdo_sqlite
-pgsql
-Phar
-posix
-readline
-Reflection
-session
-shmop
-SimpleXML
-snmp
-soap
-sockets
-SPL
-sqlite3
-standard
-sysvmsg
-sysvsem
-sysvshm
-tidy
-tokenizer
-wddx
-xml
-xmlreader
-xmlrpc
-xmlwriter
-xsl
-zlib
-```
-
-## Xdebug
-
-```shell
-# php -v
-PHP 7.3.19 (cli) (built: Jun 11 2020 21:05:09) ( NTS )
-Copyright (c) 1997-2018 The PHP Group
-Zend Engine v3.3.19, Copyright (c) 1998-2018 Zend Technologies
-    with Xdebug v2.9.6, Copyright (c) 2002-2020, by Derick Rethans
-```
-
-設定（./app/docker-xdebug.ini）
-
-```ini
-zend_extension=xdebug.so
-xdebug.remote_enable=1
-xdebug.remote_autostart=1
-;xdebug.remote_handler=dbgp
-xdebug.remote_host=host.docker.internal
-xdebug.remote_port=9001
+% tree -L 1 -a .
+.
+├── api.php       API用ルーティング
+│                 プログラム内から利用するAPI機能を特定のアドレスに割り当てるときに使用
+├── channels.php  ブロードキャスト用ルーティング
+├── console.php   コンソール用ルーティング
+└── web.php       [!]Webページ用ルーティング
+                  Webページとしてこうかいするものはすべてここに記述する
 ```
 
 ## メモ
 
-- alpine Linux への接続  
-  bash を指定すると存在しないというエラーが表示されるので ash を指定
+ルーティング
+- マルチアクションコントローラの場合  
+  アクションとアドレスの関係は以下のようになるようにルーティングする  
+  `http://アプリケーションのアドレス/コントローラ/アクション`
+- シングルアクションコントローラの場合  
+  1つのコントローラに1つのアクションしか用意しない場合は`__invoke`というマジックメソッドを使用する  
+  コントローラにメソッドは追加できるが、アクションとして呼び出すことはできなくなる。  
+  ルーティングにはアクションを示す`@~`の指定は必要なし
 
-  ```shell
-  % docker exec -it {CONTAINER ID} ash
-  ```
+テンプレートエンジン
 
-- Dockerfile の編集時はイメージを再構築する
-
-  ```shell
-  % docker-compose build --no-cache
-  ```
-
-  またはイメージの削除
-
-  ```shell
-  % docker images
-  REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-  docker-lemp_app     latest              19182eeb031d        26 minutes ago      126MB
-  ...
-  % docker rmi docker-lemp_app
-  ```
-
-- php7.4 を導入しようとしたが oniguruma でエラーを吐いて断念。
-
-- Laravel の新規プロジェクト作成  
-  PHP のイメージに繋いでから以下のコマンドを実行
-
-  ```shell
-  cd /var/www/html
-  composer create-project laravel/laravel プロジェクト名 --prefer-dist
-  ```
+- Blade（ブレード）という独自テンプレートエンジンを採用
+- テンプレートファイルの置き場はlaravelapp/resources/views/
+- テンプレートのファイル構成はコントローラの構成に添ったように構築するとわかりやすい。  
+  コントローラ名のフォルダを作成し、アクションごとのテンプレートファイルを設置する
+- テンプレートファイルがindex.phpとindex.blade.phpがあった場合は後者が優先される
+- `view()`関数は resources/views/{引数}.blade.php を表示する
+- プレースホルダーの使用は`view()`関数の第二引数に連想配列で格納する
+- CSRF対策のコード`{{csrf_token()}}`は5.6-で`@csrf`でも対応可能になった
+- POST投稿を行うときにCSRF対策を行わないと419エラーが発生する
+- 
